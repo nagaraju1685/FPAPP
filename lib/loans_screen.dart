@@ -3,18 +3,17 @@ import 'package:flutter/material.dart';
 import 'add_loan_dialog.dart';
 import 'api_client.dart';
 import 'loan.dart';
-import 'login_screen.dart';
 
-class LandingScreen extends StatefulWidget {
+class LoansScreen extends StatefulWidget {
   final String username;
 
-  const LandingScreen({super.key, required this.username});
+  const LoansScreen({super.key, required this.username});
 
   @override
-  State<LandingScreen> createState() => _LandingScreenState();
+  State<LoansScreen> createState() => _LoansScreenState();
 }
 
-class _LandingScreenState extends State<LandingScreen> {
+class _LoansScreenState extends State<LoansScreen> {
   static const _primaryBlue = Color(0xFF2A3EDB);
   static const _darkNavy = Color(0xFF13205C);
 
@@ -115,109 +114,6 @@ class _LandingScreenState extends State<LandingScreen> {
     await _persist(_loans.map((l) => l.id == loan.id ? updatedLoan : l).toList());
   }
 
-  Future<void> _handleLogout() async {
-    await ApiClient.logout();
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
-  }
-
-  Future<void> _handleChangePassword() async {
-    final oldController = TextEditingController();
-    final newController = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    bool submitting = false;
-    String? error;
-
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (dialogContext, setDialogState) {
-            Future<void> submit() async {
-              if (!formKey.currentState!.validate()) return;
-              setDialogState(() {
-                submitting = true;
-                error = null;
-              });
-              try {
-                await ApiClient.changePassword(
-                  oldPassword: oldController.text,
-                  newPassword: newController.text,
-                );
-                if (!dialogContext.mounted) return;
-                Navigator.of(dialogContext).pop();
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Password changed successfully.')),
-                );
-              } on ApiException catch (e) {
-                setDialogState(() {
-                  error = e.message;
-                  submitting = false;
-                });
-              } catch (_) {
-                setDialogState(() {
-                  error = 'Could not change password. Please try again.';
-                  submitting = false;
-                });
-              }
-            }
-
-            return AlertDialog(
-              title: const Text('Change Password'),
-              content: Form(
-                key: formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (error != null) ...[
-                      Text(error!, style: const TextStyle(color: Colors.red)),
-                      const SizedBox(height: 8),
-                    ],
-                    TextFormField(
-                      controller: oldController,
-                      obscureText: true,
-                      decoration: const InputDecoration(labelText: 'Current password'),
-                      validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: newController,
-                      obscureText: true,
-                      decoration: const InputDecoration(labelText: 'New password'),
-                      validator: (v) => (v == null || v.length < 6)
-                          ? 'Must be at least 6 characters'
-                          : null,
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: submitting ? null : () => Navigator.of(dialogContext).pop(),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: submitting ? null : submit,
-                  child: submitting
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   List<Loan> get _visibleLoans => _loans.where((l) => l.currency == _selectedCurrency).toList();
 
   String get _currencySymbol => _selectedCurrency == 'INR' ? '₹' : 'S\$';
@@ -297,6 +193,14 @@ class _LandingScreenState extends State<LandingScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
         children: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.chevron_left, color: _darkNavy, size: 28),
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
+          const SizedBox(width: 8),
           const Text('💰', style: TextStyle(fontSize: 20)),
           const SizedBox(width: 8),
           const Text(
@@ -313,64 +217,17 @@ class _LandingScreenState extends State<LandingScreen> {
             onChanged: (value) => setState(() => _selectedCurrency = value),
           ),
           const Spacer(),
-          OutlinedButton(
+          ElevatedButton.icon(
             onPressed: _handleAddLoan,
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: _primaryBlue),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _primaryBlue,
+              foregroundColor: Colors.white,
+              elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.all(8),
-              minimumSize: const Size(36, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             ),
-            child: const Icon(Icons.add, size: 18, color: _primaryBlue),
-          ),
-          const SizedBox(width: 10),
-          PopupMenuButton<String>(
-            offset: const Offset(0, 44),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            onSelected: (value) {
-              if (value == 'change_password') {
-                _handleChangePassword();
-              } else if (value == 'logout') {
-                _handleLogout();
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(
-                value: 'change_password',
-                child: Row(
-                  children: [
-                    Icon(Icons.lock_outline, size: 18, color: _darkNavy),
-                    SizedBox(width: 10),
-                    Text('Change Password'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, size: 18, color: Colors.redAccent),
-                    SizedBox(width: 10),
-                    Text('Logout'),
-                  ],
-                ),
-              ),
-            ],
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: _darkNavy,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.person, size: 16, color: Colors.white70),
-                  const SizedBox(width: 6),
-                  Text(widget.username, style: const TextStyle(color: Colors.white)),
-                ],
-              ),
-            ),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Add Loan', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
           ),
         ],
       ),

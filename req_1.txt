@@ -1,9 +1,13 @@
 desighn dash bord screnn as attached, use above scrren for reference and them and colors should folowas current app only. 
 Create Quick Asxxess for only 
-    1. Profile - view & edit profile
-    2. Loans -  View and manage Loans
-    3. Paymnets - View Montly Paymnets
-    4. Property - View and Manage Properties
+    1. Profile - view & edit profile  - will implement latter
+    2. Loans -  View and manage Loans - point current landing page to Laons 
+    3. Paymnets - View Montly Paymnets - will implement latter
+    4. Property - View and Manage Properties - will implement latter
+    5. Daily Expence -  view & add Expence - will implement latter
+    6. Todo - view & edit Todo list - will implement latter
 
 upadte Upcoming Events -> Upcoming payments
-    under this section show current flexy payments 
+    under this section show current flexy loans close priority like similer to attached screen
+
+  

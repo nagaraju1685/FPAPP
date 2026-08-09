@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'api_client.dart';
-import 'landing_screen.dart';
+import 'dashboard_screen.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => LandingScreen(username: _usernameController.text.trim()),
+          builder: (_) => DashboardScreen(username: _usernameController.text.trim()),
         ),
       );
     } on ApiException catch (e) {
