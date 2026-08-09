@@ -1,0 +1,21 @@
+
+BASE_URL="${BASE_URL:-http://fin.movetosmart.com}"
+COOKIE_JAR="${COOKIE_JAR:-/tmp/fp_cookies.txt}"
+
+# ── Signup (creates account + logs in, sets session cookie) ───────────────────
+curl -i -c "$COOKIE_JAR" -X POST "$BASE_URL/signup" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "secret123",
+    "currencies": ["INR", "SGD"]
+  }'
+
+
+
+  curl -i -c "$COOKIE_JAR" -X POST "$BASE_URL/login" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "secret123"
+  }'

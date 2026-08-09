@@ -1,0 +1,9 @@
+desighn dash bord screnn as attached, use above scrren for reference and them and colors should folowas current app only. 
+Create Quick Asxxess for only 
+    1. Profile - view & edit profile
+    2. Loans -  View and manage Loans
+    3. Paymnets - View Montly Paymnets
+    4. Property - View and Manage Properties
+
+upadte Upcoming Events -> Upcoming payments
+    under this section show current flexy payments 
