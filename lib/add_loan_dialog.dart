@@ -33,6 +33,7 @@ class _AddLoanDialogState extends State<AddLoanDialog> {
 
   // Flex fields
   final _totalAmountController = TextEditingController();
+  final _minPaymentPercentController = TextEditingController();
   DateTime? _expiryDate;
 
   @override
@@ -41,6 +42,7 @@ class _AddLoanDialogState extends State<AddLoanDialog> {
     _monthlyEmiController.dispose();
     _monthsController.dispose();
     _totalAmountController.dispose();
+    _minPaymentPercentController.dispose();
     super.dispose();
   }
 
@@ -104,6 +106,7 @@ class _AddLoanDialogState extends State<AddLoanDialog> {
       Navigator.of(context).pop(loan);
     } else {
       final total = num.parse(_totalAmountController.text);
+      final minPaymentPercent = num.tryParse(_minPaymentPercentController.text);
       final loan = Loan(
         id: id,
         type: 'FLEX',
@@ -116,6 +119,7 @@ class _AddLoanDialogState extends State<AddLoanDialog> {
             ? null
             : '${_expiryDate!.year}-${_twoDigits(_expiryDate!.month)}-${_twoDigits(_expiryDate!.day)}',
         payments: const [],
+        minPaymentPercent: minPaymentPercent,
       );
       Navigator.of(context).pop(loan);
     }
@@ -245,6 +249,20 @@ class _AddLoanDialogState extends State<AddLoanDialog> {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: _fieldDecoration(),
         validator: (v) => (num.tryParse(v ?? '') == null) ? 'Enter a valid amount' : null,
+      ),
+      const SizedBox(height: 16),
+      _Label('Min. Payment %', suffix: '(optional, 0-20)'),
+      const SizedBox(height: 6),
+      TextFormField(
+        controller: _minPaymentPercentController,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        decoration: _fieldDecoration(),
+        validator: (v) {
+          if (v == null || v.trim().isEmpty) return null;
+          final pct = num.tryParse(v);
+          if (pct == null || pct < 0 || pct > 20) return 'Enter a value between 0 and 20';
+          return null;
+        },
       ),
       const SizedBox(height: 16),
       _Label('Expiry / Close-by Date', suffix: '(optional)'),

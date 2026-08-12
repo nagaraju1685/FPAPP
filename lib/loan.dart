@@ -25,10 +25,12 @@ class Loan {
   final int? months;
   final String? startDate; // "YYYY-MM"
   final List<bool>? paidMonths;
+  final int? emiDay; // day of month EMI is due, 1-31
 
   // FLEX-specific
   final String? expiryDate; // "YYYY-MM-DD"
   final List<FlexPayment>? payments;
+  final num? minPaymentPercent;
 
   Loan({
     required this.id,
@@ -42,8 +44,10 @@ class Loan {
     this.months,
     this.startDate,
     this.paidMonths,
+    this.emiDay,
     this.expiryDate,
     this.payments,
+    this.minPaymentPercent,
   });
 
   bool get isEmi => type == 'EMI';
@@ -67,8 +71,10 @@ class Loan {
       months: months,
       startDate: startDate,
       paidMonths: paidMonths ?? this.paidMonths,
+      emiDay: emiDay,
       expiryDate: expiryDate,
       payments: payments ?? this.payments,
+      minPaymentPercent: minPaymentPercent,
     );
   }
 
@@ -85,10 +91,12 @@ class Loan {
       months: json['months'] as int?,
       startDate: json['startDate'] as String?,
       paidMonths: (json['paidMonths'] as List?)?.map((e) => e as bool).toList(),
+      emiDay: json['emiDay'] as int?,
       expiryDate: json['expiryDate'] as String?,
       payments: (json['payments'] as List?)
           ?.map((e) => FlexPayment.fromJson(e as Map<String, dynamic>))
           .toList(),
+      minPaymentPercent: json['minPaymentPercent'] as num?,
     );
   }
 
@@ -106,6 +114,7 @@ class Loan {
         'months': months,
         'startDate': startDate,
         'paidMonths': paidMonths,
+        'emiDay': emiDay,
       } else ...{
         if (expiryDate != null) 'expiryDate': expiryDate,
         'payments': payments?.map((p) => p.toJson()).toList() ?? [],
