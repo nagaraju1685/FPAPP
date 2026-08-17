@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'api_client.dart';
 import 'dashboard_screen.dart';
+import 'reset_password_screen.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -58,11 +59,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      await ApiClient.login(
+      final resetRequired = await ApiClient.login(
         username: _usernameController.text.trim(),
         password: _passwordController.text,
       );
       if (!mounted) return;
+      if (resetRequired) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+        );
+        return;
+      }
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => DashboardScreen(username: _usernameController.text.trim()),
