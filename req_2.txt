@@ -1,0 +1,37 @@
+Can up update payments_screen with below req
+get all EMI loans based on month show in page like below
+    provide current month and year and left and right arrows to move previos month and next month also provide option to select any monnth  
+    "Loane Name"(readonly) "EMI Amount"(readonly) Check Box.  Foe all EMI loans 
+    if I check it should update in current page also in loanpage for that pertucular lon month
+
+    show pie chart for current month toatal amount 
+
+craete baranch payments-update and do changes    
+
+
+
+Can up update payments_screen with below req
+get all EMI loans based on month show in page like below
+    provide current month and year and left and right arrows to move previos month and next month also provide option to select any monnth  
+    "Loane Name"(readonly) "EMI Amount"(readonly) Check Box.  Foe all EMI loans 
+    loans order based on emi day
+    if I check it should update in current page also in loanpage for that pertucular lon month
+
+    show pie chart for current month toatal amount 
+
+craete baranch payments-update and do changes       
+
+
+also add flexy emi section in payment page like below 
+
+"Loane Name"  min amount(calculate as min payment persentage of total loan amount) paybuttin 
+once click on pay button should remove from main amount add in db with cuttent datte same sam pay amount option in felix loan page. 
+onece paid for the current month make pay button disable for current month 
+also dont show if min payement persentage is zero in this section.
+
+
+
+
+
+cuttent should show only min persanemtage amount if nothing paid for current monnth. if current monnth paid already disable pay button and show total amount paid in current month 
+for previous monnth selected show only how much money paid for that month and also disable pay button 
