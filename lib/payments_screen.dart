@@ -174,9 +174,30 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
           (l.balance > 0 || _paidInMonth(l, _selectedMonth)))
       .toList();
 
+  static const _monthAbbrs = [
+    'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+    'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+  ];
+
+  // Payment dates are usually ISO 8601, but some rows (added outside the app)
+  // store a display string like "Aug 17, 2026" instead.
+  DateTime? _parsePaymentDate(String raw) {
+    final iso = DateTime.tryParse(raw);
+    if (iso != null) return iso;
+
+    final match = RegExp(r'^([A-Za-z]{3,})\s+(\d{1,2}),\s*(\d{4})$').firstMatch(raw.trim());
+    if (match == null) return null;
+    final monthIndex = _monthAbbrs.indexOf(match.group(1)!.toLowerCase().substring(0, 3));
+    if (monthIndex == -1) return null;
+    final day = int.tryParse(match.group(2)!);
+    final year = int.tryParse(match.group(3)!);
+    if (day == null || year == null) return null;
+    return DateTime(year, monthIndex + 1, day);
+  }
+
   bool _paidInMonth(Loan loan, DateTime month) {
     return (loan.payments ?? []).any((p) {
-      final date = DateTime.tryParse(p.date);
+      final date = _parsePaymentDate(p.date);
       if (date == null) return false;
       return date.year == month.year && date.month == month.month;
     });
@@ -184,6 +205,14 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
 
   num _minPaymentAmount(Loan loan) {
     return ((loan.balance * (loan.minPaymentPercent ?? 0) / 100) * 100).round() / 100;
+  }
+
+  num _paidAmountInMonth(Loan loan, DateTime month) {
+    return (loan.payments ?? []).fold<num>(0, (sum, p) {
+      final date = _parsePaymentDate(p.date);
+      if (date == null || date.year != month.year || date.month != month.month) return sum;
+      return sum + p.amount;
+    });
   }
 
   Future<void> _payFlexMin(Loan loan) async {
@@ -493,6 +522,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
     final minAmount = _minPaymentAmount(loan);
     final paid = _paidInMonth(loan, _selectedMonth);
     final disabled = paid || minAmount <= 0 || !_isCurrentMonth;
+    final displayAmount = paid ? _paidAmountInMonth(loan, _selectedMonth) : minAmount;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -503,7 +533,9 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
               Text(loan.name, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
               Text(
-                'Min. payment: ${loan.minPaymentPercent}% of balance',
+                paid
+                    ? 'Paid this month'
+                    : 'Min. payment: ${loan.minPaymentPercent}% of balance',
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
               ),
             ],
@@ -512,7 +544,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Text(
-            '${_currencySymbol(loan.currency)}${_formatAmount(minAmount)}',
+            '${_currencySymbol(loan.currency)}${_formatAmount(displayAmount)}',
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
         ),
