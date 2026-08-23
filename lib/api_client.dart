@@ -174,7 +174,20 @@ class ApiClient {
     return decoded['resetRequired'] as bool? ?? false;
   }
 
-  static Future<bool> _refreshTokens() async {
+  // Coalesces concurrent 401s onto a single refresh call. Without this,
+  // simultaneous requests (e.g. several endpoints hit on app resume) would
+  // each refresh independently; since the backend rotates the refresh token
+  // on every use, only the first call succeeds and the rest see the
+  // already-rotated-out token as invalid, wrongly ending the session.
+  static Future<bool>? _refreshInFlight;
+
+  static Future<bool> _refreshTokens() {
+    return _refreshInFlight ??= _doRefreshTokens().whenComplete(() {
+      _refreshInFlight = null;
+    });
+  }
+
+  static Future<bool> _doRefreshTokens() async {
     final refreshToken = _refreshToken;
     if (refreshToken == null) return false;
 
